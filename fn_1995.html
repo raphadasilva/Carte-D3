@@ -174,11 +174,12 @@ d3.json ("fn_1995_communes.json",function (error,fn) {
           }
           else {return couleurs[8]}
         })
+        // on survole de la souris, on affiche la légende...
         .on('mouseover', function(d, i) {
           tip.show(d,i);
         })
         .on('mouseout',  function(d, i) {
-          // quand la souris quitte la zone, on remet simplement l'opacité de la classe "bar" à 1
+          // ... et on l'efface quand la souris la quitte
           tip.hide(d,i);
         });
 
