@@ -12,7 +12,7 @@
 <style>
 
 
-#carte:hover .communes:hover {  
+.communes:hover {  
   fill:#331515;
 }
 
@@ -98,18 +98,19 @@ var width = 500,
 var width3=500,
     height3=150;
 
-
+// la projection se compose d'un type de projection, des coordonnées du centre de la carte, et d'une échelle
 var proj = d3.geo.mercator()
   .center([7.56, 48.27])
     .scale(20000)
     .translate([width / 2, height / 2]);
 
+// ce tableau contient les teintes de notre future carte
 var couleurs = ['#000000','#252525','#525252','#737373','#969696','#bdbdbd','#d9d9d9','#f0f0f0','#ffffff'];
 
 var path = d3.geo.path()
     .projection(proj);
 
-// on définit trois variables sgv qui correspondent aux div "carte", "graphe" et "légende"
+// on définit deux variables sgv qui correspondent aux div "carte" et et "légende"
 
 var svg = d3.select("#carte").append("svg")
     .attr("width", width)
@@ -120,14 +121,13 @@ var svg3 = d3.select("#legende").append("svg")
     .attr("width", width3)
     .attr("height", height3);
 
-// on charge ensuite le fond de carte, les contours des bureaux de vote et les données grâce à la commande queue()
-
 
 
 d3.json ("fn_1995_communes.json",function (error,fn) {
 
 
-// place ensuite à la légende qui s'affichera au survol sur les bureaux de vote. On y a ajouté un test 'if' pour bien distinguer recul et progression
+// on paramètre la légende qui s'affichera au survol de chaque zone, en interrogeant le fichier de données
+// et en affectant des styles CSS
 
   var tip = d3.tip()
       .attr('class', 'd3-tip')
@@ -138,11 +138,11 @@ d3.json ("fn_1995_communes.json",function (error,fn) {
         fn_exp=fn.features[i].properties.fn_p_exp
         inscrits = fn.features[i].properties.inscrits
         abs_ins=fn.features[i].properties.abs_ins
-        return "<span class='t_bureau'>"+nom_commune+"</span><br/>En 1995<hr/><u>Inscrits</u> : "+inscrits+"</br></br><u>Abstention</u> : <b>"+abs_ins+"%</b></br></br> <u>FN</u> : <b>"+fn_exp+"%</b>,</br> soit <b> "+voix_fn+" électeurs</b> "
+        return "<span class='t_commune'>"+nom_commune+"</span><br/>En 1995<hr/><u>Inscrits</u> : "+inscrits+"</br></br><u>Abstention</u> : <b>"+abs_ins+"%</b></br></br> <u>FN</u> : <b>"+fn_exp+"%</b>,</br> soit <b> "+voix_fn+" électeurs</b> "
       })
       svg.call(tip);
 
-// on s'occupe maintenant de l'histogramme
+// l'avantage du SVG, c'est qu'on peut affecter aux zones des styles CSS (ici le changement de couleur au survol)
 
 
   svg.append("g").attr("class","communes")
@@ -154,7 +154,7 @@ d3.json ("fn_1995_communes.json",function (error,fn) {
           .attr("d", path)
           .attr("stroke","#333333")
           .attr('stroke-width', '0.5')
-          .attr("fill", function(d,i){
+          .attr("fill", function(d,i){ // on applique les teintes aux zones avec une fonctione if/else qui distribue les valeurs du tableau précédent en fonction de seuils
               if (fn.features[i].properties.fn_p_exp>32.17){
             return couleurs[0]
           }
