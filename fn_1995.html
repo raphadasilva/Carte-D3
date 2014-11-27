@@ -1,0 +1,286 @@
+
+
+<!DOCTYPE html>
+<meta charset="utf-8">
+<head>
+  <script src="http://d3js.org/d3.v3.min.js"></script>
+    <script src="http://d3js.org/queue.v1.min.js"></script>
+    <script src="http://d3js.org/topojson.v1.min.js"></script>
+    <script src="d3.tip.js"></script>
+
+</head>
+<style>
+
+
+#carte:hover .communes:hover {  
+  fill:#331515;
+}
+
+.t_commune{
+  font-size: 13px;
+  font-weight: bold;
+}
+
+.d3-tip {
+  line-height: 1.5;
+  font-weight: normal;
+  font-family: Arial;
+  padding: 5px;
+  background: rgba(125, 125, 125, 0.9);
+  color: white;
+  border-radius: 4px;
+  font-size: 11px!important;
+  margin-left: 25px;
+  margin-top: 205px;
+}
+
+
+
+#container{
+  width:500px;
+  height:1200px;
+  position: absolute;
+}
+
+#carte{
+  width:500px;
+  height: 950px;
+  margin-top:-30px;
+  position: absolute;
+}
+
+
+#legende{
+    margin-top:900px;
+    position:absolute;
+    width: 500px;
+}
+
+#source{
+  position: absolute;
+  margin-top: 1020px;
+  width: 500px;
+margin-left: 30px;
+font-family: Arial;
+font-size: 0.8em;
+}
+
+h1{
+  font-family: Arial;
+  font-size: 1.2em;
+  width: 500px;
+  margin-left: auto;
+  text-align:center;
+}
+
+
+
+</style>
+<body>
+
+<div id="container">
+  <h1>C'est dans le nord de la région que le FN a fait ses meilleurs scores en 1995</h1>
+  <div id="carte"></div>
+  <div id="legende"></div>
+   <div id="source">Source : <a href="https://www.data.gouv.fr/fr/datasets/election-presidentielle-1995-resultats-572085/" target="_blank">Data.gouv.fr</a></div>
+
+</div>
+
+
+<script>
+
+
+
+var width = 500,
+    height = 950;
+
+
+var width3=500,
+    height3=150;
+
+
+var proj = d3.geo.mercator()
+  .center([7.56, 48.27])
+    .scale(20000)
+    .translate([width / 2, height / 2]);
+
+var couleurs = ['#000000','#252525','#525252','#737373','#969696','#bdbdbd','#d9d9d9','#f0f0f0','#ffffff'];
+
+var path = d3.geo.path()
+    .projection(proj);
+
+// on définit trois variables sgv qui correspondent aux div "carte", "graphe" et "légende"
+
+var svg = d3.select("#carte").append("svg")
+    .attr("width", width)
+    .attr("height", height);
+
+
+var svg3 = d3.select("#legende").append("svg")
+    .attr("width", width3)
+    .attr("height", height3);
+
+// on charge ensuite le fond de carte, les contours des bureaux de vote et les données grâce à la commande queue()
+
+
+
+d3.json ("fn_1995_communes.json",function (error,fn) {
+
+
+// place ensuite à la légende qui s'affichera au survol sur les bureaux de vote. On y a ajouté un test 'if' pour bien distinguer recul et progression
+
+  var tip = d3.tip()
+      .attr('class', 'd3-tip')
+      .offset([-10, 0])
+      .html(function(d,i) {
+        nom_commune = fn.features[i].properties.COMMUNE
+        voix_fn = fn.features[i].properties.voix_fn
+        fn_exp=fn.features[i].properties.fn_p_exp
+        inscrits = fn.features[i].properties.inscrits
+        abs_ins=fn.features[i].properties.abs_ins
+        return "<span class='t_bureau'>"+nom_commune+"</span><br/>En 1995<hr/><u>Inscrits</u> : "+inscrits+"</br></br><u>Abstention</u> : <b>"+abs_ins+"%</b></br></br> <u>FN</u> : <b>"+fn_exp+"%</b>,</br> soit <b> "+voix_fn+" électeurs</b> "
+      })
+      svg.call(tip);
+
+// on s'occupe maintenant de l'histogramme
+
+
+  svg.append("g").attr("class","communes")
+        .selectAll("path")
+        .data(fn.features)
+        .enter()
+          .append("path")
+          .attr("class", "communes")
+          .attr("d", path)
+          .attr("stroke","#333333")
+          .attr('stroke-width', '0.5')
+          .attr("fill", function(d,i){
+              if (fn.features[i].properties.fn_p_exp>32.17){
+            return couleurs[0]
+          }
+          else if (fn.features[i].properties.fn_p_exp>29.85) {return couleurs[1]
+          }
+          else if (fn.features[i].properties.fn_p_exp>28.14) {return couleurs[2]
+          }
+          else if (fn.features[i].properties.fn_p_exp>26.36) {return couleurs[3]
+          }
+          else if (fn.features[i].properties.fn_p_exp>24.92) {return couleurs[4]
+          }
+          else if (fn.features[i].properties.fn_p_exp>23.49) {return couleurs[5]
+          }
+          else if (fn.features[i].properties.fn_p_exp>21.92) {return couleurs[6]
+          }
+          else if (fn.features[i].properties.fn_p_exp>19.45) {return couleurs[7]
+          }
+          else {return couleurs[8]}
+        })
+        .on('mouseover', function(d, i) {
+          tip.show(d,i);
+        })
+        .on('mouseout',  function(d, i) {
+          // quand la souris quitte la zone, on remet simplement l'opacité de la classe "bar" à 1
+          tip.hide(d,i);
+        });
+
+// plus qu'à bricoler la légende et le tour est joué
+
+    svg3.append("g")
+      .append("text")
+      .attr("x", 30)
+      .attr("y", 22)
+      .attr("font-size", 11)
+      .attr("font-family","Arial")
+      .text("En avril 1995, le FN enregistrait dans cette ville :")
+
+    svg3.append("g").attr("class", "legende")
+      .selectAll("rect")
+      .data(["Plus de 32%", "30% à 32%", "28% à 30%","26% à 28%","25% à 26%"])
+      .enter()
+      .append("rect")
+      .attr("stroke","#000")
+      .attr('stroke-width', '1')
+      .attr("x", function(d,i){
+          return 30+i*83
+      })
+      .attr("y", 40)
+      .attr("fill", function(d){
+        if (d == "Plus de 32%"){
+            return couleurs[0]
+          }
+          else if (d == "30% à 32%"){
+           return couleurs[1]
+          }
+          else if (d == "28% à 30%"){
+           return couleurs[2]
+         } else if (d == "26% à 28%"){
+           return couleurs[3]
+         }
+          else if (d == "25% à 26%"){
+           return couleurs[4]
+         }
+      })
+      .attr("width", 50)
+      .attr("height", 12)
+
+    svg3.append("g").attr("class", "legende")
+      .selectAll("text")
+      .data(["Plus de 32%", "30% à 32%", "28% à 30%","26% à 28%","25% à 26%"])
+      .enter()
+      .append("text")
+      .attr("x", function(d,i){
+          return 27+i*85
+      })
+      .attr("y", 69)
+      .attr("font-family","Arial")
+      .attr("font-size", 10.1)
+      .text(function(d){return d})
+
+      svg3.append("g").attr("class", "legende")
+      .selectAll("rect")
+      .data(["23% à 25%", "22% à 23%", "19% à 22%","Moins de 19%"])
+      .enter()
+      .append("rect")
+      .attr("stroke","#000")
+      .attr('stroke-width', '1')
+      .attr("x", function(d,i){
+          return 30+i*83
+      })
+      .attr("y", 80)
+      .attr("fill", function(d){
+        if (d == "23% à 25%"){
+            return couleurs[5]
+          }
+          else if (d == "22% à 23%"){
+           return couleurs[6]
+          }
+          else if (d == "19% à 22%"){
+           return couleurs[7]
+         } else if (d == "Moins de 19%"){
+           return couleurs[8]
+         }
+      })
+      .attr("width", 50)
+      .attr("height", 12)
+
+    svg3.append("g").attr("class", "legende")
+      .selectAll("text")
+      .data(["23% à 25%", "22% à 23%", "19% à 22%","Moins de 19%"])
+      .enter()
+      .append("text")
+      .attr("x", function(d,i){
+          return 27+i*84
+      })
+      .attr("y", 109)
+      .attr("font-family","Arial")
+      .attr("font-size", 10.1)
+      .text(function(d){return d})
+
+
+
+
+
+});
+
+</script>
+
+</body>
