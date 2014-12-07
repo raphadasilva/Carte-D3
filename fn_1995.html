@@ -143,7 +143,7 @@ d3.json ("fn_1995_communes.json",function (error,fn) {
 // l'avantage du SVG, c'est qu'on peut affecter aux zones des styles CSS (ici le changement de couleur au survol)
 
 
-  svg.append("g").attr("class","communes")
+  svg.append("g").attr("class","villes") // le nom de cette classe n'a pas d'importance
         .selectAll("path")
         .data(fn.features)
         .enter()
