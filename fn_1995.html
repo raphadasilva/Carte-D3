@@ -32,7 +32,44 @@
   margin-top: 205px;
 }
 
+.d3-tip-2 {
+  line-height: 1.5;
+  font-weight: normal;
+  font-family: Arial;
+  padding: 5px;
+  background: rgba(125, 125, 125, 0.9);
+  color: white;
+  border-radius: 4px;
+  font-size: 11px!important;
+  margin-left: -65px;
+  margin-top: 205px;
+}
 
+.d3-tip-3 {
+  line-height: 1.5;
+  font-weight: normal;
+  font-family: Arial;
+  padding: 5px;
+  background: rgba(125, 125, 125, 0.9);
+  color: white;
+  border-radius: 4px;
+  font-size: 11px!important;
+  margin-left: 45px;
+  margin-top: 205px;
+}
+
+.d3-tip-4 {
+  line-height: 1.5;
+  font-weight: normal;
+  font-family: Arial;
+  padding: 5px;
+  background: rgba(125, 125, 125, 0.9);
+  color: white;
+  border-radius: 4px;
+  font-size: 11px!important;
+  margin-left: 45px;
+  margin-top: 180px;
+}
 
 #container{
   width:500px;
@@ -173,9 +210,24 @@ d3.json ("fn_1995_communes.json",function (error,fn) {
           else {return couleurs[8]}
         })
         // au survol de la souris, on affiche la légende...
-        .on('mouseover', function(d, i) {
+          .on('mouseover', function(d, i) {
+          var pos=this;
+
           tip.show(d,i);
-        })
+
+            tip.attr('class', function(){
+      //on crée une fonction qui assigne une classe
+      //à chaque fois que la souris se balade sur un des bords de la carte, pour éviter un mauvais affichage
+      if (pos.getBBox().x > 400)
+        return 'd3-tip-2'
+      else if (pos.getBBox().x < 30)
+        return 'd3-tip-3'
+      else if (pos.getBBox().y > 860)
+        return 'd3-tip-4'
+      else
+        return 'd3-tip'
+    })
+            })
         .on('mouseout',  function(d, i) {
           // ... et on l'efface quand la souris la quitte
           tip.hide(d,i);
